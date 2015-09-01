@@ -8,8 +8,8 @@ import android.view.ViewGroup;
 
 import com.airbnb.android.airmapview.listeners.InfoWindowCreator;
 import com.airbnb.android.airmapview.listeners.OnCameraChangeListener;
-import com.airbnb.android.airmapview.listeners.OnLatLngScreenLocationCallback;
 import com.airbnb.android.airmapview.listeners.OnInfoWindowClickListener;
+import com.airbnb.android.airmapview.listeners.OnLatLngScreenLocationCallback;
 import com.airbnb.android.airmapview.listeners.OnMapBoundsCallback;
 import com.airbnb.android.airmapview.listeners.OnMapClickListener;
 import com.airbnb.android.airmapview.listeners.OnMapLoadedListener;
@@ -41,7 +41,7 @@ public class NativeGoogleMapFragment extends SupportMapFragment implements AirMa
   }
 
   @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                           Bundle savedInstanceState) {
+      Bundle savedInstanceState) {
     View v = super.onCreateView(inflater, container, savedInstanceState);
 
     init();
@@ -77,11 +77,15 @@ public class NativeGoogleMapFragment extends SupportMapFragment implements AirMa
   }
 
   @Override public void addMarker(AirMapMarker airMarker) {
-    airMarker.addToGoogleMap(googleMap);
+    Marker marker = googleMap.addMarker(airMarker.getMarkerOptions());
+    airMarker.setGoogleMarker(marker);
   }
 
   @Override public void removeMarker(AirMapMarker marker) {
-    marker.removeFromGoogleMap();
+    Marker nativeMarker = marker.getMarker();
+    if (nativeMarker != null) {
+      nativeMarker.remove();
+    }
   }
 
   @Override public void setOnInfoWindowClickListener(final OnInfoWindowClickListener listener) {
@@ -94,7 +98,7 @@ public class NativeGoogleMapFragment extends SupportMapFragment implements AirMa
   }
 
   @Override public void setInfoWindowCreator(GoogleMap.InfoWindowAdapter adapter,
-                                             InfoWindowCreator creator) {
+      InfoWindowCreator creator) {
     googleMap.setInfoWindowAdapter(adapter);
   }
 
@@ -111,13 +115,13 @@ public class NativeGoogleMapFragment extends SupportMapFragment implements AirMa
   }
 
   @Override public void drawCircle(LatLng latLng, int radius, int borderColor, int borderWidth,
-                         int fillColor) {
+      int fillColor) {
     googleMap.addCircle(new CircleOptions()
-                             .center(latLng)
-                             .strokeColor(borderColor)
-                             .strokeWidth(borderWidth)
-                             .fillColor(fillColor)
-                             .radius(radius));
+        .center(latLng)
+        .strokeColor(borderColor)
+        .strokeWidth(borderWidth)
+        .fillColor(fillColor)
+        .radius(radius));
   }
 
   @Override public void getMapScreenBounds(OnMapBoundsCallback callback) {
@@ -132,8 +136,7 @@ public class NativeGoogleMapFragment extends SupportMapFragment implements AirMa
     builder.include(projection.fromScreenLocation(
         new Point(hOffset, getView().getHeight() - vOffset))); // bottom-left
     builder.include(projection.fromScreenLocation(new Point(getView().getWidth() - hOffset,
-                                                            getView().getHeight()
-                                                            - vOffset))); // bottom-right
+        getView().getHeight() - vOffset))); // bottom-right
 
     callback.onMapBoundsReady(builder.build());
   }
@@ -167,12 +170,11 @@ public class NativeGoogleMapFragment extends SupportMapFragment implements AirMa
     return (int) googleMap.getCameraPosition().zoom;
   }
 
-  @Override public void setOnCameraChangeListener(final OnCameraChangeListener onCameraChangeListener) {
+  @Override
+  public void setOnCameraChangeListener(final OnCameraChangeListener onCameraChangeListener) {
     googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
-
-      @Override
-      public void onCameraChange(CameraPosition cameraPosition) {
-        // camera change can occur programatically.
+      @Override public void onCameraChange(CameraPosition cameraPosition) {
+        // camera change can occur programmatically.
         if (isResumed()) {
           onCameraChangeListener.onCameraChanged(cameraPosition.target, (int) cameraPosition.zoom);
         }
@@ -224,7 +226,7 @@ public class NativeGoogleMapFragment extends SupportMapFragment implements AirMa
     return googleMap.isMyLocationEnabled();
   }
 
-  @Override public void setMapToolbarEnabled(boolean enabled){
+  @Override public void setMapToolbarEnabled(boolean enabled) {
     googleMap.getUiSettings().setMapToolbarEnabled(enabled);
   }
 
@@ -236,6 +238,19 @@ public class NativeGoogleMapFragment extends SupportMapFragment implements AirMa
     polyline.removeFromGoogleMap();
   }
 
+  @Override public void setMapType(MapType type) {
+    int nativeType;
+    if (type == MapType.MAP_TYPE_NORMAL) {
+      nativeType = GoogleMap.MAP_TYPE_NORMAL;
+    } else if (type == MapType.MAP_TYPE_SATELLITE) {
+      nativeType = GoogleMap.MAP_TYPE_SATELLITE;
+    } else if (type == MapType.MAP_TYPE_TERRAIN) {
+      nativeType = GoogleMap.MAP_TYPE_TERRAIN;
+    } else {
+      nativeType = GoogleMap.MAP_TYPE_NORMAL;
+    }
+    googleMap.setMapType(nativeType);
+  }
 
   /**
    * This method will return the google map if initialized. Will return null otherwise

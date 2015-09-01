@@ -1,137 +1,150 @@
 package com.airbnb.android.airmapview;
 
 import android.graphics.Bitmap;
-import android.text.TextUtils;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 /**
- * Helper class for keeping record of data needed to display map markers, as well as an object T
- * associated with the marker
+ * Wrapper around {@link MarkerOptions}. Keeps record of data needed to display map markers, as
+ * well as an object T associated with the marker.
  */
 public class AirMapMarker<T> {
 
-  private T object;
-  private long id;
-  private LatLng latLng;
-  private String title;
-  private String snippet;
-  private int iconId;
-  private Bitmap bitmap;
-  private Marker googleMarker;
+  private final T object;
+  private final long id;
+  private final MarkerOptions markerOptions;
+  private Marker marker;
 
-  public AirMapMarker(LatLng latLng, long id) {
-    this(null, latLng, id);
+  private AirMapMarker(T object, long id, MarkerOptions markerOptions) {
+    this.object = object;
+    this.id = id;
+    this.markerOptions = markerOptions;
   }
 
-  public AirMapMarker(T object, LatLng latLng, long id) {
-    this.object = object;
-    this.latLng = latLng;
-    this.id = id;
+  public T object() {
+    return object;
   }
 
   public long getId() {
     return id;
   }
 
-  public AirMapMarker<T> setId(long id) {
-    this.id = id;
-    return this;
-  }
-
   public LatLng getLatLng() {
-    return latLng;
-  }
-
-  public AirMapMarker<T> setLatLng(LatLng latLng) {
-    this.latLng = latLng;
-    return this;
+    return markerOptions.getPosition();
   }
 
   public String getTitle() {
-    return title;
-  }
-
-  public AirMapMarker<T> setTitle(String title) {
-    this.title = title;
-    return this;
+    return markerOptions.getTitle();
   }
 
   public String getSnippet() {
-    return snippet;
+    return markerOptions.getSnippet();
   }
 
-  public AirMapMarker<T> setSnippet(String snippet) {
-    this.snippet = snippet;
-    return this;
+  public MarkerOptions getMarkerOptions() {
+    return markerOptions;
   }
 
-  public int getIconId() {
-    return iconId;
+  /** Sets a marker associated to this object */
+  void setGoogleMarker(Marker marker) {
+    this.marker = marker;
   }
 
-  public AirMapMarker<T> setIconId(int iconId) {
-    this.iconId = iconId;
-    return this;
+  Marker getMarker() {
+    return marker;
   }
 
-  public AirMapMarker<T> setIcon(Bitmap bitmap) {
-    this.bitmap = bitmap;
-    return this;
-  }
+  public static class Builder<T> {
+    private T object;
+    private long id;
+    private final MarkerOptions markerOptions = new MarkerOptions();
 
-  public T getObject() {
-    return object;
-  }
-
-  public AirMapMarker<T> setObject(T object) {
-    this.object = object;
-    return this;
-  }
-
-  /**
-   * Add this marker to the given {@link com.google.android.gms.maps.GoogleMap} instance
-   *
-   * @param googleMap the {@link com.google.android.gms.maps.GoogleMap} instance to which the marker
-   *                  will be added
-   */
-  public void addToGoogleMap(GoogleMap googleMap) {
-    MarkerOptions options = new MarkerOptions();
-
-    options.position(latLng);
-
-    if (!TextUtils.isEmpty(title)) {
-      options.title(title);
+    public Builder() {
     }
 
-    if (!TextUtils.isEmpty(snippet)) {
-      options.snippet(snippet);
+    public Builder<T> object(T object) {
+      this.object = object;
+      return this;
     }
 
-    if (bitmap != null) {
-      options.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
-    } else if (iconId > 0) {
-      options.icon(BitmapDescriptorFactory.fromResource(iconId));
+    public Builder<T> id(long id) {
+      this.id = id;
+      return this;
     }
 
-    // add the marker and keep a reference so it can be removed
-    googleMarker = googleMap.addMarker(options);
-  }
-
-  /**
-   * Remove this polyline from a GoogleMap (if it was added).
-   *
-   * @return true if the {@link com.google.android.gms.maps.model.Polyline} was removed
-   */
-  public boolean removeFromGoogleMap() {
-    if (googleMarker != null) {
-      googleMarker.remove();
-      return true;
+    public Builder<T> position(LatLng position) {
+      markerOptions.position(position);
+      return this;
     }
-    return false;
+
+    public Builder<T> anchor(float u, float v) {
+      markerOptions.anchor(u, v);
+      return this;
+    }
+
+    public Builder<T> infoWindowAnchor(float u, float v) {
+      markerOptions.infoWindowAnchor(u, v);
+      return this;
+    }
+
+    public Builder<T> title(String title) {
+      markerOptions.title(title);
+      return this;
+    }
+
+    public Builder<T> snippet(String snippet) {
+      markerOptions.snippet(snippet);
+      return this;
+    }
+
+    public Builder<T> iconId(int iconId) {
+      try {
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(iconId));
+      } catch (NullPointerException ignored) {
+        // google play services is not available
+      }
+      return this;
+    }
+
+    public Builder<T> bitmap(Bitmap bitmap) {
+      try {
+        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(bitmap));
+      } catch (NullPointerException ignored) {
+        // google play services is not available
+      }
+      return this;
+    }
+
+    public Builder<T> draggable(boolean draggable) {
+      markerOptions.draggable(draggable);
+      return this;
+    }
+
+    public Builder<T> visible(boolean visible) {
+      markerOptions.visible(visible);
+      return this;
+    }
+
+    public Builder<T> flat(boolean flat) {
+      markerOptions.flat(flat);
+      return this;
+    }
+
+    public Builder<T> rotation(float rotation) {
+      markerOptions.rotation(rotation);
+      return this;
+    }
+
+    public Builder<T> alpha(float alpha) {
+      markerOptions.alpha(alpha);
+      return this;
+    }
+
+    public AirMapMarker<T> build() {
+      return new AirMapMarker<>(object, id, markerOptions);
+    }
   }
 }

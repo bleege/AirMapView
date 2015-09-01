@@ -79,7 +79,8 @@ public interface AirMapInterface {
   void drawCircle(LatLng latLng, int radius, int borderColor, int borderWidth, int fillColor);
 
   /**
-   * Returns the map screen bounds to the supplied {@link com.airbnb.android.airmapview.listeners.OnMapBoundsCallback}
+   * Returns the map screen bounds to the supplied
+   * {@link com.airbnb.android.airmapview.listeners.OnMapBoundsCallback}
    */
   void getMapScreenBounds(OnMapBoundsCallback callback);
 
@@ -181,10 +182,8 @@ public interface AirMapInterface {
 
   /**
    * Construct a polyline with the given {@link LatLng} points
-   *
-   * @param {@link AirMapPolyline} instance
    */
-  void addPolyline(AirMapPolyline polyline);
+  <T> void addPolyline(AirMapPolyline<T> polyline);
 
   /**
    * Remove the given {@link Polyline}
@@ -192,4 +191,7 @@ public interface AirMapInterface {
    * @param polyline the {@link Polyline} to remove
    */
   void removePolyline(AirMapPolyline polyline);
+
+  /** Sets the type of map tiles that should be displayed */
+  void setMapType(MapType type);
 }

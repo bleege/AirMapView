@@ -32,6 +32,8 @@ Grab via Gradle:
 compile 'com.airbnb.android:airmapview:1.2.0'
 ```
 
+Snapshots of the development version are available in [Sonatype's `snapshots` repository](https://oss.sonatype.org/content/repositories/snapshots/).
+
 ## Sample App
 The project includes a sample app which uses AirMapView. The sample app allows toggling between map providers, exemplifies adding map markers, and displays various callback information. The sample project can be built manually or you can [download the APK](https://www.dropbox.com/s/8gcxn2ouc44t53x/AirMapView-Sample.apk?dl=0).
 
@@ -61,15 +63,14 @@ The project includes a sample app which uses AirMapView. The sample app allows t
 ## Mapbox Web setup
 To use Mapbox Web maps in AirMapView, you'll need to [sign up for a free account with Mapbox](https://www.mapbox.com/signup/).  From there you'll use an [Access Token](https://www.mapbox.com/help/define-access-token/) and [Map ID](https://www.mapbox.com/help/define-map-id/) in your AirMapView app.  They're are then included in your app's `AndroidManifest.xml` file as `meta-data` fields.
 
-    ```xml
-    <meta-data
-        android:name="com.mapbox.ACCESS_TOKEN"
-        android:value=ACCESS_TOKEN/>
-
-    <meta-data
-        android:name="com.mapbox.MAP_ID"
-        android:value=MAP_ID/>
-    ```
+```xml
+<meta-data
+    android:name="com.mapbox.ACCESS_TOKEN"
+    android:value=ACCESS_TOKEN/>
+<meta-data
+    android:name="com.mapbox.MAP_ID"
+    android:value=MAP_ID/>
+```
 
 ## Native Google Maps setup
 
